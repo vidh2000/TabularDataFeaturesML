@@ -19,7 +19,7 @@ keys = ['sepal length (cm)', 'sepal width (cm)', 'petal length (cm)',
 X = data[['sepal length (cm)', 'sepal width (cm)', 'petal length (cm)',
        'petal width (cm)']]
 y = data["species_id"]
-# Assuming you have your data (X) and labels (y)
+
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3,random_state=312)
 
 # Get the example for later testing 
