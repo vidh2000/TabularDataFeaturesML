@@ -5,6 +5,7 @@ from sklearn.decomposition import PCA
 from sklearn.model_selection import train_test_split
 from sklearn.cluster import KMeans
 import numpy as np
+from sklearn.datasets import make_blobs
 
 data = loadData()
 
@@ -44,25 +45,47 @@ for label, color in colors.items():
 plt.xlabel('Feature 1')
 plt.ylabel('Feature 2')
 plt.legend()
+plt.title('Sepal Data after PCA')
 plt.grid(True)
 
 # Clustering with K-Means
-kmeans = KMeans(n_clusters=3, n_init="auto").fit(X)
-ypred = kmeans.labels_
-df["kmeans predictions"] = ypred
+kmeans = KMeans(n_clusters=3, n_init="auto").fit(X_reduced)
+labels = kmeans.labels_
+df["kmeans predictions"] = labels
 
-accuracy = float(sum((ypred == df["species_id"])))/len(ypred)
-print(accuracy)
+# Get cluster means (centroids)
+cluster_centers = kmeans.cluster_centers_
 
-# Create a scatter plot with different colors for each class
+# Calculate distances between data points and cluster means
+distances = []
+for i in range(len(X_reduced)):
+    cluster_label = labels[i]
+    cluster_mean = cluster_centers[cluster_label]
+    distance = np.linalg.norm(X_reduced[i] - cluster_mean)  # Euclidean distance
+    distances.append(distance)
+
+
+# Create a scatter plot showing centroids and obtained cluster points
 plt.figure(figsize=(8, 6))
 for label, color in colors.items():
     subset = df[df["kmeans predictions"] == label]
-    plt.scatter(subset[0], subset[1], c=color, label=f'Species No. {label+1}', marker='o', s=50)
+    plt.scatter(subset[0], subset[1], c=color, 
+                label=f'Species No. {label+1}', marker='o', s=50)
+
+# Plot cluster means (centroids)
+plt.scatter(cluster_centers[:, 0], cluster_centers[:, 1], 
+            c='black', s=200, marker='X', label='Cluster Means')
+
+# Optional: Plot lines connecting data points to cluster means
+for i in range(len(X)):
+    plt.plot([X_reduced[i, 0], 
+            cluster_centers[labels[i], 0]], [X_reduced[i, 1], 
+            cluster_centers[labels[i], 1]], 'k-', alpha=0.3)
+
 plt.xlabel('Feature 1')
 plt.ylabel('Feature 2')
+plt.title('K-Means Clustering with Cluster Means and Distances')
 plt.legend()
 plt.grid(True)
-
 
 plt.show()
